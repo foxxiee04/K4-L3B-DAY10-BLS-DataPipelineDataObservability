@@ -1,58 +1,45 @@
-# Danh Sách Thành Viên & Báo Cáo Phân Công Nhóm
+# Danh sách thành viên & phân công — BLS
 
-- **Tên Nhóm:** `[Điền tên nhóm]`
-- **Mã Nhóm / Lớp:** `K4-L3-DAY10`
-- **Tên Repository Nộp Bài:** `K4-L3-DAY10-TenNhom-DataPipeline`
+- Nhóm: **BLS**
+- Lớp/bài: **K4-L3B-DAY10**
+- Repository: https://github.com/foxxiee04/K4-L3B-DAY10-BLS-DataPipelineDataObservability
 
----
+Phân công đối chiếu báo cáo cá nhân và lịch sử Git. Không gán chức danh trưởng nhóm khi chưa có xác nhận.
 
-## # Thành viên
+| Họ và tên | MSSV | Email tác giả Git | Phạm vi chính | Báo cáo cá nhân |
+| --- | --- | --- | --- | --- |
+| Đinh Tuấn Long | 2A202602620 | dinhtuanlong05@gmail.com | CP0–CP1: ingestion, cleaning, lưu dữ liệu, GX và freshness | [Báo cáo](../report/2A202602620_DinhTuanLong.md) |
+| Lê Duy Bảo | 2A202602749 | leduybao612003@gmail.com | CP2: benchmark test set | [Báo cáo](../report/LeDuyBao_2A202602749.md) |
+| Trần Quốc Sáng | 2A202602712 | sangtranquocgl@gmail.com | CP3: tích hợp baseline, indexing/evaluation, báo cáo pha 1 | [Báo cáo](../report/individual_2A202602712_TranQuocSang.md) |
+| Nguyễn Đình Anh Đức | 2A202602856 | ducnda0212@gmail.com | CP4–CP5: corruption, repair, báo cáo so sánh | [Báo cáo](../report/individual_2A202602856_NguyenDinhAnhDuc.md) |
 
-| STT | Họ và tên | MSSV | Email | Vai trò & Phân công công việc | Báo cáo cá nhân |
-|---:|---|---|---|---|---|
-| 1 | | | | Trưởng nhóm / Pipeline Integrator (`core/`, `phase1.py`, `corruption_flow.py`) | `report/<MSSV1>_HoTen.md` |
-| 2 | | | | Data Foundation & Recovery (`crossref.py`, `cleaning.py`, raw data) | `report/<MSSV2>_HoTen.md` |
-| 3 | | | | RAG & Vector Index (`retrieval/index.py`, `embeddings.py`, ChromaDB) | `report/<MSSV3>_HoTen.md` |
-| 4 | | | | Observability & Evaluation (`quality.py` GX 1.x, `testset.py`, reporting) | `report/<MSSV4>_HoTen.md` |
+## Đóng góp có bằng chứng
 
-*(Nếu nhóm có 3 hoặc 5-6 thành viên, xem bảng phân công chi tiết theo vai trò trong file `CHECKPOINTS.md`)*.
+### Đinh Tuấn Long — 2A202602620
 
----
+- Commit `b6f083d`: ingestion, cleaning, quality/freshness, raw records và quality artifacts.
+- Terminal cá nhân xác nhận Python 3.12.10, Quality=True, Freshness=True, Overall=True.
+- Hỗ trợ review tích hợp và hoàn thiện tài liệu/code với AI; đợt thay đổi mới chưa có kết quả end-to-end mới.
 
-## # Cá nhân
+### Lê Duy Bảo — 2A202602749
 
-### ## HoVaTen1-MSSV1
-- **Vai trò:** Trưởng nhóm & Điều phối Pipeline.
-- **Công việc chi tiết đã hoàn thành:**
-  - Thiết lập cấu hình hệ thống `core/config.py` và đường dẫn artifacts `core/utils.py`.
-  - Kết nối luồng thực thi trong `src/pipelines/phase1.py` và `src/pipelines/corruption_flow.py`.
-  - Kiểm tra tính nhất quán của các artifacts và theo dõi Contributor tracking trên GitHub nhánh `main`.
-- **Điều học được / Đóng góp chính:**
-  - Hiểu sâu sắc về thiết kế Idempotent Pipeline và quản lý trạng thái luồng dữ liệu đa tầng.
+- Commit `036c6cb`: 10 câu hỏi gồm 3 summary, 3 authors, 2 date, 2 categories.
+- Bàn giao question, ground_truth và ground_truth_doc_ids dùng chung cho ba trạng thái.
 
-### ## HoVaTen2-MSSV2
-- **Vai trò:** Phụ trách Ingestion, Làm sạch & Phục hồi dữ liệu.
-- **Công việc chi tiết đã hoàn thành:**
-  - Xây dựng module thu thập Crossref API với cơ chế Fallback offline trong `src/ingestion/crossref.py`.
-  - Chuẩn hóa schema, tính toán trường `age_days` và `text_for_embedding` trong `src/ingestion/cleaning.py`.
-  - Thực thi cơ chế Idempotent Repair phục hồi dữ liệu từ raw snapshot.
-- **Điều học được / Đóng góp chính:**
-  - Kỹ thuật truy vết nguồn gốc dữ liệu (Data Lineage) và bảo toàn raw snapshot trước khi biến đổi.
+### Trần Quốc Sáng — 2A202602712
 
-### ## HoVaTen3-MSSV3
-- **Vai trò:** Phụ trách RAG, Vector Database & Embedding.
-- **Công việc chi tiết đã hoàn thành:**
-  - Quản lý mô hình embedding `sentence-transformers/all-MiniLM-L6-v2`.
-  - Nạp và quản lý 3 collection riêng biệt trong ChromaDB (`papers-baseline`, `papers-corrupted`, `papers-repaired`).
-  - Xây dựng QA Agent truy vấn ngữ cảnh chính xác theo tài liệu.
-- **Điều học được / Đóng góp chính:**
-  - Cách cô lập các không gian vector để so sánh khách quan giữa dữ liệu sạch và dữ liệu bị lỗi.
+- Commit `a24a50c`, `d9daa97`: tích hợp baseline và báo cáo pha 1.
+- Điều phối nguồn → cleaning → quality → ChromaDB → test set → evaluation → report.
+- Chuyển reporting sang module chung được bổ sung sau review; không thay đổi ghi nhận đóng góp baseline ban đầu.
 
-### ## HoVaTen4-MSSV4
-- **Vai trò:** Phụ trách Data Observability & Benchmark Evaluation.
-- **Công việc chi tiết đã hoàn thành:**
-  - Thiết lập Quality Gate theo chuẩn mới **Great Expectations 1.x** và giám sát Freshness SLA trong `src/observability/quality.py`.
-  - Xây dựng bộ câu hỏi đánh giá chuẩn trong `src/evaluation/testset.py`.
-  - Đo lường và xuất bảng đối chiếu 3 trạng thái vào `data/reports/corruption_report.md`.
-- **Điều học được / Đóng góp chính:**
-  - Cách thiết lập hệ thống cảnh báo sớm chặn đứng hiện tượng Silent Failure trước khi dữ liệu vào serving layer.
+### Nguyễn Đình Anh Đức — 2A202602856
+
+- Commit `3d21d57` và báo cáo cá nhân: sáu kịch bản corruption, repair từ raw và báo cáo so sánh.
+- Bàn giao corrupted/repaired metrics, answers, quality và data artifacts.
+
+## Nghiệm thu
+
+- CP6: cả nhóm chuẩn bị demo; mỗi người tự nộp link LMS và giải thích phần phụ trách.
+- Email trên lấy từ lịch sử commit; liên kết email với GitHub và Contributors cần từng người kiểm tra.
+- Báo cáo của các thành viên khác giữ nguyên tên hiện có để bảo toàn liên kết. Chủ báo cáo nên thống nhất quy ước `<MSSV>_HoTen.md` trước khi nộp.
+- Cam kết do từng thành viên tự xác nhận.

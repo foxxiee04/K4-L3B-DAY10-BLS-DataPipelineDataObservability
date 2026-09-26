@@ -1,60 +1,14 @@
 from __future__ import annotations
 
-from dataclasses import asdict
-from pathlib import Path
-
 from core.config import load_settings
-from core.utils import now_utc, write_csv, write_json, write_text
+from core.utils import now_utc, write_csv, write_json
 from evaluation.metrics import evaluate_pipeline
 from evaluation.testset import build_test_set
 from ingestion.cleaning import build_clean_dataframe
 from ingestion.crossref import fetch_source_records
 from observability.quality import run_data_quality_checks
+from observability.reporting import generate_phase1_report
 from retrieval.index import LocalEmbeddingIndex
-
-
-def _build_report(
-    *,
-    row_count: int,
-    quality_report: dict,
-    metrics: dict,
-    collection_name: str,
-) -> str:
-    freshness = quality_report.get("freshness", {})
-
-    return f"""# Phase 1 Baseline Report
-
-## Dataset
-
-- Clean papers: {row_count}
-- Chroma collection: `{collection_name}`
-
-## Data Quality
-
-- Overall success: {quality_report.get("success")}
-- Quality success: {quality_report.get("quality_success")}
-- Freshness success: {freshness.get("is_fresh")}
-- Stale rows: {freshness.get("stale_rows")}
-- Stale ratio: {freshness.get("stale_ratio")}
-- Freshness threshold: {freshness.get("threshold_days")} days
-
-## RAG Evaluation
-
-- Samples: {metrics.get("samples")}
-- Retrieval hit rate: {metrics.get("retrieval_hit_rate")}
-- Mean token F1: {metrics.get("mean_token_f1")}
-- Judge accuracy: {metrics.get("judge_accuracy")}
-- Mean judge score: {metrics.get("mean_judge_score")}
-
-## Ragas
-
-{metrics.get("ragas")}
-
-## Conclusion
-
-This report records the clean baseline before controlled data corruption.
-The same evaluation set should be reused for corrupted and repaired runs.
-"""
 
 
 def main() -> None:
@@ -91,6 +45,9 @@ def main() -> None:
         quality_report.get("freshness", {}).get("is_fresh"),
     )
 
+    if not quality_report["success"]:
+        raise RuntimeError("Baseline quality/freshness failed. Inspect data/quality before indexing.")
+
     print("[4/7] Building baseline Chroma index...")
     index = LocalEmbeddingIndex.build(
         df,
@@ -118,14 +75,11 @@ def main() -> None:
     )
 
     print("[7/7] Writing baseline report...")
-    report = _build_report(
-        row_count=len(df),
-        quality_report=quality_report,
-        metrics=evaluation.summary,
-        collection_name=index.collection_name,
+    generate_phase1_report(
+        settings.paths.baseline_report,
+        {"row_count": len(df), "collection": index.collection_name, "source": settings.source_api},
+        evaluation.summary, quality_report, quality_report["freshness"],
     )
-
-    write_text(settings.paths.baseline_report, report)
 
     print()
     print("=== Phase 1 baseline completed ===")

@@ -11,15 +11,20 @@ def generate_phase1_report(
     quality: dict[str, Any],
     freshness: dict[str, Any],
 ) -> None:
-    """TODO(student): viet markdown report cho baseline phase.
-
-    Pseudo-code:
-    1. Gom source summary.
-    2. In metrics retrieval/evaluation.
-    3. In data quality va freshness.
-    4. Ghi markdown vao report_path.
-    """
-    raise NotImplementedError("Student task: implement phase 1 report.")
+    """Write baseline evidence from the current pipeline run."""
+    lines = ["# Phase 1 Baseline Report", "", "## Dataset", ""]
+    lines.extend(f"- {key}: {value}" for key, value in source_summary.items())
+    lines.extend(["", "## Quality and Freshness", "",
+                  f"- Overall success: {quality.get('success')}",
+                  f"- GX quality success: {quality.get('quality_success')}",
+                  f"- Freshness success: {freshness.get('is_fresh')}",
+                  f"- Stale rows: {freshness.get('stale_rows')}",
+                  f"- Stale ratio: {freshness.get('stale_ratio')}",
+                  "", "## Evaluation", ""])
+    lines.extend(f"- {key}: {value}" for key, value in metrics.items())
+    lines.extend(["", "Use the same evaluation contract and test set for corruption and repair.",
+                  "Mock answers and heuristic judges are not evidence of LLM-agent execution.", ""])
+    write_text(report_path, "\n".join(lines))
 
 
 def generate_corruption_report(
@@ -92,6 +97,10 @@ def generate_corruption_report(
         ),
         "|---|---:|---:|---:|---:|---:|",
     ]
+    lines[2:2] = ["## Evaluation configuration", "",
+                  f"- Baseline: {baseline_metrics.get('evaluation_contract', 'Legacy run: configuration not recorded')}",
+                  f"- Corrupted: {corrupted_metrics.get('evaluation_contract', 'Legacy run: configuration not recorded')}",
+                  f"- Repaired: {repaired_metrics.get('evaluation_contract', 'Legacy run: configuration not recorded')}", ""]
 
     for metric_name in metric_names:
         lines.append(

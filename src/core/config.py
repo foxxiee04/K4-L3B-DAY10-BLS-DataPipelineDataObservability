@@ -141,6 +141,8 @@ def load_settings(project_dir: Path | None = None) -> Settings:
 
 def normalized_provider(settings: Settings) -> str:
     provider = settings.llm_provider.strip().lower().replace(" ", "").replace("-", "")
+    if provider == "google":
+        return "gemini"
     if provider == "anthorpic":
         return "anthropic"
     if provider == "customllm":

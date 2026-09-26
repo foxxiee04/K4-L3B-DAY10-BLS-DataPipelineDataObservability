@@ -1,5 +1,22 @@
 # K4-L3B-Day10 — Data Pipeline & Data Observability for RAG
 
+## BLS — kiểm tra phiên bản sau review
+
+Trong CMD tại repo, kích hoạt venv Python 3.12 và chạy:
+
+```cmd
+python -m pip install -e .
+set JUDGE_MODE=heuristic
+script\verify_submission.cmd
+python script/run_agent_demo.py
+```
+
+Provider/model/key lấy từ `.env`; không gửi hoặc commit key. Demo agent cần provider thật. Muốn chạy QA offline thì đặt `LLM_PROVIDER=mock`, nhưng bỏ qua demo agent và không coi đó là bằng chứng LLM hoạt động.
+
+Bản sửa dùng semantic retrieval và QA có context, ghi `evaluation_contract`, không âm thầm fallback judge. Cần chạy lại baseline trước corruption vì artifact cũ dùng phương pháp đánh giá khác. Metrics đang commit là **kết quả lịch sử**, không phải số đo của bản sửa. Chạy xong đọc report tự sinh trong `data/reports/` và cập nhật bảng kết quả trong báo cáo nhóm/cá nhân.
+
+Kiểm tra hồi quy không cần dịch vụ ngoài: `python -m unittest discover -s tests -v`. Các test này dùng service doubles, không thay thế chạy end-to-end. Báo cáo nhóm ghi rõ giới hạn và trạng thái nghiệm thu.
+
 > **Hình thức:** Teamwork | **Thời lượng:** 240 phút  
 > **Lịch học (Lớp B - Ca Sáng):** Thứ 7 (26/09/2026) 09:00 – 13:00  
 > ⏰ **Hạn nộp LMS:** 23:59:59 cùng ngày

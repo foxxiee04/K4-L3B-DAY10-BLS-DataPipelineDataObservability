@@ -5,12 +5,14 @@ from statistics import mean
 import os
 import sys
 import types
+import hashlib
+import json
 from typing import Any
 
 from datasets import Dataset
 from pydantic import BaseModel, Field
 
-from core.config import Settings
+from core.config import Settings, normalized_provider
 from core.utils import normalize_whitespace, read_json, write_json
 from retrieval.embeddings import MiniLMEmbeddings
 from retrieval.index import LocalEmbeddingIndex
@@ -46,6 +48,14 @@ def _token_f1(reference: str, prediction: str) -> float:
 
 
 def _judge_answer(settings: Settings, question: str, reference: str, prediction: str) -> JudgeVerdict:
+    mode = os.getenv("JUDGE_MODE", "heuristic").lower()
+    if mode == "heuristic":
+        f1 = _token_f1(reference, prediction)
+        score = 5 if f1 >= 0.95 else 3 if f1 >= 0.5 else 1
+        return JudgeVerdict(score=score, correct=score >= 3,
+                            reasoning="Explicit heuristic judge (token overlap); not an LLM verdict.")
+    if mode != "llm":
+        raise ValueError("JUDGE_MODE must be heuristic or llm.")
     prompt = f"""
 Evaluate the model answer against the reference answer.
 
@@ -61,13 +71,22 @@ Return:
     try:
         llm = build_llm(settings=settings, temperature=0.0).with_structured_output(JudgeVerdict)
         return llm.invoke(prompt)
-    except Exception:
-        score = 5 if _token_f1(reference, prediction) >= 0.95 else 3 if _token_f1(reference, prediction) >= 0.5 else 1
-        return JudgeVerdict(
-            score=score,
-            correct=score >= 3,
-            reasoning="Fallback heuristic judge used because the LLM evaluator was unavailable.",
-        )
+    except Exception as exc:
+        raise RuntimeError("LLM judge failed. No silent fallback; fix credentials or rerun all phases with JUDGE_MODE=heuristic.") from exc
+
+
+def evaluation_contract(settings: Settings, test_set_path) -> dict[str, Any]:
+    mode = os.getenv("JUDGE_MODE", "heuristic").lower()
+    if mode not in {"heuristic", "llm"}:
+        raise ValueError("JUDGE_MODE must be heuristic or llm.")
+    provider = normalized_provider(settings)
+    if mode == "llm" and provider == "mock":
+        raise ValueError("Mock provider requires JUDGE_MODE=heuristic.")
+    payload = json.dumps(read_json(test_set_path), sort_keys=True, ensure_ascii=False)
+    return {"version": 2, "retrieval": "semantic_only", "answer_mode": "extractive_mock" if provider == "mock" else "grounded_llm",
+            "provider": provider, "model": settings.model_name if provider != "mock" else "mock",
+            "judge_mode": mode, "top_k": settings.top_k, "embedding_model": settings.embedding_model,
+            "test_set_sha256": hashlib.sha256(payload.encode("utf-8")).hexdigest()}
 
 
 def _run_ragas(settings: Settings, answers: list[dict[str, Any]]) -> dict[str, Any]:
@@ -108,6 +127,9 @@ def evaluate_pipeline(
     answers_output_path,
 ) -> EvaluationBundle:
     test_set = read_json(test_set_path)
+    if not isinstance(test_set, list) or not test_set:
+        raise ValueError("Evaluation requires a non-empty test set.")
+    contract = evaluation_contract(settings, test_set_path)
     answers: list[dict[str, Any]] = []
 
     for item in test_set:
@@ -131,6 +153,7 @@ def evaluate_pipeline(
         )
 
     summary = {
+        "evaluation_contract": contract,
         "samples": len(answers),
         "retrieval_hit_rate": mean(1.0 if item["retrieval_hit"] else 0.0 for item in answers),
         "mean_token_f1": mean(item["token_f1"] for item in answers),

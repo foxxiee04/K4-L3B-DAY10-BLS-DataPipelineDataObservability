@@ -7,7 +7,7 @@ import pandas as pd
 
 from core.config import Settings, load_settings
 from core.utils import now_utc, read_json, write_csv, write_json
-from evaluation.metrics import evaluate_pipeline
+from evaluation.metrics import evaluate_pipeline, evaluation_contract
 from ingestion.cleaning import build_clean_dataframe
 from ingestion.corruption import corrupt_clean_dataframe
 from ingestion.crossref import load_raw_records
@@ -127,6 +127,8 @@ def run_corruption_flow_pipeline(
     print("[1/10] Loading baseline artifacts...")
     baseline_df = _load_dataframe(settings.paths.clean_json)
     baseline_metrics = read_json(settings.paths.baseline_metrics)
+    if baseline_metrics.get("evaluation_contract") != evaluation_contract(settings, settings.paths.eval_testset):
+        raise ValueError("Baseline uses an old/different evaluation configuration. Run script/run_phase1.py again with the same provider, model, judge and test set before corruption flow.")
     baseline_quality = read_json(
         settings.paths.baseline_quality_report
     )
