@@ -34,9 +34,9 @@
 | --------------------------- | ----------------------------- | ------------------------- | ----------------------- |
 | Triển khai sáu loại lỗi dữ liệu | `src/ingestion/corruption.py` | Corrupted dataset có 21 rows và log đủ 6 corruption | `data/results/corruption_log.json` |
 | Kiểm tra dữ liệu corrupted bằng GX và Freshness SLA | `run_data_quality_checks()` | Quality gate và freshness đều chuyển sang `False` | `data/quality/corrupted_quality_report.json`, `corrupted_freshness_report.json` |
-| Xây dựng và đánh giá index corrupted | Collection `papers-corrupted` | Retrieval Hit Rate giảm từ `1.0` xuống `0.8`; Token F1 giảm từ `1.0` xuống `0.9` | `data/results/corrupted_metrics.json` |
+| Xây dựng và đánh giá index corrupted | Collection `papers-corrupted` | Retrieval Hit Rate giảm từ `1.0` xuống `0.8`; Token F1 giảm từ `0.8728` xuống `0.6792` | `data/results/corrupted_metrics.json` |
 | Phục hồi dữ liệu từ raw snapshot | `repair_from_raw_snapshot()` | Khôi phục 24 records sạch, 24 ID duy nhất | `papers_clean_repaired.json` và repaired quality report |
-| Xây dựng và đánh giá index repaired | Collection `papers-repaired` | Retrieval Hit Rate và Token F1 phục hồi về `1.0` | `data/results/repaired_metrics.json` |
+| Xây dựng và đánh giá index repaired | Collection `papers-repaired` | Retrieval Hit Rate phục hồi về `1.0`; Token F1 phục hồi `0.8572` (gần baseline `0.8728`) | `data/results/repaired_metrics.json` |
 | Sinh báo cáo đối chiếu ba trạng thái | `generate_corruption_report()` | Bảng Baseline vs Corrupted vs Repaired cùng phân tích quality/freshness | `data/reports/corruption_report.md` |
 
 Nêu một output cụ thể mà phần việc của bạn tạo ra hoặc giúp xác minh: `data/reports/corruption_report.md`:
@@ -110,7 +110,7 @@ python script/run_corruption_flow.py
 ```
 
 - **Kết quả mong đợi:** Corrupted quality/freshness fail, corrupted metrics giảm; repaired quality/freshness pass và repaired metrics phục hồi.
-- **Kết quả thực tế:** Corrupted Hit Rate đạt `0.8`, Token F1 đạt `0.9`; repaired Hit Rate và Token F1 cùng trở lại `1.0`.
+- **Kết quả thực tế (verify 2026-09-26):** Corrupted Hit Rate đạt `0.8`, Token F1 đạt `0.6792`; repaired Hit Rate về lại `1.0`, Token F1 phục hồi `0.8572` (gần baseline `0.8728`; chênh lệch nhỏ do LLM sinh câu trả lời khác nhau giữa các lần chạy).
 - **Artifact/log:**
   - `data/results/corruption_log.json`
   - `data/results/corrupted_metrics.json`
@@ -127,7 +127,7 @@ python script/run_corruption_flow.py
   2. Khôi phục hoàn toàn bằng cách đọc lại raw snapshot và chạy lại cleaning.
 - **Phương án đã chọn:** Dựng lại repaired dataset từ `data/raw/crossref_records.json`.
 - **Lý do:** Sửa trực tiếp dữ liệu lỗi dễ bỏ sót corruption, phụ thuộc vào thứ tự các phép sửa và khó bảo đảm idempotent. Raw snapshot là nguồn lineage chưa bị biến đổi, nên chạy lại cleaning cho kết quả ổn định, dễ kiểm tra và không che giấu lỗi.
-- **Bằng chứng quyết định phù hợp:** Repaired dataset có 24 records, 24 ID duy nhất, quality/freshness đều pass. `papers_clean_repaired.json` giống baseline clean JSON và `repaired_metrics.json` giống baseline metrics.
+- **Bằng chứng quyết định phù hợp:** Repaired dataset có 24 records, 24 ID duy nhất, quality/freshness đều pass. `papers_clean_repaired.json` giống hệt baseline clean JSON (cùng hash); `repaired_metrics.json` dùng cùng evaluation_contract với baseline, retrieval phục hồi tuyệt đối còn answer metrics tiệm cận baseline.
 
 ## 6. Một lỗi hoặc blocker đã xử lý
 
@@ -157,7 +157,7 @@ Giải thích ngắn gọn bằng lời của bạn:
 2. Evaluation set chứa câu hỏi, đáp án chuẩn và `ground_truth_doc_ids`. Với mỗi câu hỏi, hệ thống lấy top-k documents từ index. Retrieval được xem là hit nếu một ID chuẩn xuất hiện trong các document lấy về. Câu trả lời được so với ground truth bằng Token F1 và judge score.
 3. Quality checks kiểm tra cấu trúc và tính hợp lệ của dữ liệu, ví dụ row count, uniqueness, null và độ dài văn bản. Freshness monitoring đo mức độ cũ của dữ liệu thông qua `age_days` và stale ratio. Một dataset có thể đúng schema nhưng vẫn quá cũ, vì vậy hai loại kiểm tra bổ sung cho nhau.
 4. Baseline, corrupted và repaired phải dùng cùng test set để thay đổi metrics chỉ phản ánh thay đổi dữ liệu/index. Nếu sinh test set mới cho từng trạng thái, phép so sánh sẽ không còn công bằng.
-5. Repair được xem là thành công khi repaired dataset trở lại 24 records sạch, quality/freshness đều pass và các RAG metrics phục hồi bằng hoặc gần baseline. Trong kết quả hiện tại, repaired dataset và repaired metrics phục hồi hoàn toàn về baseline.
+5. Repair được xem là thành công khi repaired dataset trở lại 24 records sạch, quality/freshness đều pass và các RAG metrics phục hồi bằng hoặc gần baseline. Trong kết quả verify 2026-09-26, retrieval phục hồi hoàn toàn về baseline còn answer metrics tiệm cận baseline (F1 0.8572 so với 0.8728).
 
 ## 8. Phân tích kết quả
 
@@ -166,9 +166,9 @@ Giải thích ngắn gọn bằng lời của bạn:
 | Metric/signal | Baseline | Corrupted | Repaired | Nhận xét của cá nhân |
 |---|---:|---:|---:|---|
 | `retrieval_hit_rate` | 1.0 | 0.8 | 1.0 | Corruption làm mất retrieval hit ở 20% test cases; repair phục hồi hoàn toàn |
-| `mean_token_f1` | 1.0 | 0.9 | 1.0 | Answer quality giảm ít hơn hit rate vì một số document liên quan vẫn có nội dung gần ground truth |
-| `judge_accuracy` | 1.0 | 0.9 | 1.0 | Giảm ở trạng thái corrupted và phục hồi sau repair |
-| `mean_judge_score` | 5.0 | 4.7 | 5.0 | Mức suy giảm nhỏ nhưng có thể đo được |
+| `mean_token_f1` | 0.8728 | 0.6792 | 0.8572 | Answer quality giảm mạnh theo hit rate; phục hồi gần baseline (lệch nhỏ do biến thiên sinh LLM) |
+| `judge_accuracy` | 1.0 | 0.7 | 0.9 | Giảm ở trạng thái corrupted và phục hồi gần hoàn toàn sau repair (judge heuristic thống nhất ba pha) |
+| `mean_judge_score` | 4.4 | 3.6 | 4.2 | Mức suy giảm và phục hồi đều đo được rõ ràng |
 | Quality checks | Pass | Fail | Pass | Corrupted data vi phạm row count, uniqueness, title length và summary checks |
 | Freshness status | Pass | Fail | Pass | Stale ratio tăng từ 4.17% lên 28.57%, sau repair trở lại 4.17% |
 
@@ -181,14 +181,14 @@ Hoàn thành hai chuỗi nguyên nhân–bằng chứng sau:
 
 Corruption nào ảnh hưởng rõ nhất và vì sao?
 
-1. Drop records, blank summary, truncated title, duplicates và stale dates làm quality gate chuyển từ `True` sang `False`; stale ratio tăng từ `0.0417` lên `0.2857`; Retrieval Hit Rate giảm từ `1.0` xuống `0.8` và Mean Token F1 giảm từ `1.0` xuống `0.9`.
-2. Repair bằng cách đọc lại raw snapshot và chạy lại cleaning làm quality/freshness trở lại `True`; 24 records sạch được khôi phục; Retrieval Hit Rate và Mean Token F1 cùng trở lại `1.0`.
+1. Drop records, blank summary, truncated title, duplicates và stale dates làm quality gate chuyển từ `True` sang `False`; stale ratio tăng từ `0.0417` lên `0.2857`; Retrieval Hit Rate giảm từ `1.0` xuống `0.8` và Mean Token F1 giảm từ `0.8728` xuống `0.6792`.
+2. Repair bằng cách đọc lại raw snapshot và chạy lại cleaning làm quality/freshness trở lại `True`; 24 records sạch được khôi phục; Retrieval Hit Rate về lại `1.0` và Mean Token F1 phục hồi `0.8572`, gần baseline.
 
 Corruption ảnh hưởng rõ nhất là **drop latest records**. Năm document mới nhất bị xóa hoàn toàn khỏi corrupted index, trong đó có document được benchmark tham chiếu. Khi ground-truth document không còn trong index, retrieval không thể tạo hit cho câu hỏi tương ứng. Điều này giải thích trực tiếp mức giảm Hit Rate từ `1.0` xuống `0.8`.
 
 Kết quả nào khác với kỳ vọng ban đầu?
 
-Token F1 chỉ giảm `0.1` dù Retrieval Hit Rate giảm `0.2`. Giả thuyết: Khi document chuẩn bị xóa, semantic search vẫn tìm được document có nội dung gần tương tự, nên một phần câu trả lời vẫn trùng với ground truth.
+Token F1 giảm `0.1936` trong khi Retrieval Hit Rate giảm `0.2`. Giả thuyết: Khi document chuẩn bị xóa, semantic search vẫn tìm được document có nội dung gần tương tự, nên một phần câu trả lời vẫn trùng với ground truth; đồng thời đáp án LLM sinh ra có biến thiên giữa các lần chạy.
 
 ## 9. Điều học được và hướng cải thiện
 
@@ -210,7 +210,7 @@ Corruption type
 → thay đổi Token F1
 ```
 
-Cải thiện này giúp xác định chính xác corruption nào ảnh hưởng mạnh nhất thay vì chỉ đo tác động tổng hợp. Đồng thời, tôi sẽ cố định cùng một judge mode cho baseline, corrupted và repaired để bảo đảm judge metrics có thể so sánh trực tiếp.
+Cải thiện này giúp xác định chính xác corruption nào ảnh hưởng mạnh nhất thay vì chỉ đo tác động tổng hợp. Lần verify 2026-09-26 đã cố định cùng một judge mode (heuristic tường minh) cho baseline, corrupted và repaired để bảo đảm judge metrics có thể so sánh trực tiếp.
 
 ## 10. Cam kết của thành viên
 

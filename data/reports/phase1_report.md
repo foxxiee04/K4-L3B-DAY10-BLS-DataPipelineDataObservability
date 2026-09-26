@@ -2,31 +2,27 @@
 
 ## Dataset
 
-- Clean papers: 24
-- Chroma collection: `papers-baseline`
+- row_count: 24
+- collection: papers-baseline
+- source: Crossref REST API
 
-## Data Quality
+## Quality and Freshness
 
 - Overall success: True
-- Quality success: True
+- GX quality success: True
 - Freshness success: True
 - Stale rows: 1
 - Stale ratio: 0.041666666666666664
-- Freshness threshold: 180 days
 
-## RAG Evaluation
+## Evaluation
 
-- Samples: 10
-- Retrieval hit rate: 1.0
-- Mean token F1: 1.0
-- Judge accuracy: 1.0
-- Mean judge score: 5
+- evaluation_contract: {'version': 2, 'retrieval': 'semantic_only', 'answer_mode': 'grounded_llm', 'provider': 'gemini', 'model': 'gemini-3.5-flash-lite', 'judge_mode': 'heuristic', 'top_k': 4, 'embedding_model': 'sentence-transformers/all-MiniLM-L6-v2', 'test_set_sha256': 'c735aa9aff78984a3d9b6d9835778866bd7a863f05a48ab9aa2705c887da6aa4'}
+- samples: 10
+- retrieval_hit_rate: 1.0
+- mean_token_f1: 0.8727596017069701
+- judge_accuracy: 1.0
+- mean_judge_score: 4.4
+- ragas: {'skipped': 'Set RUN_RAGAS=1 to enable the slower Ragas pass.'}
 
-## Ragas
-
-{'skipped': 'Set RUN_RAGAS=1 to enable the slower Ragas pass.'}
-
-## Conclusion
-
-This report records the clean baseline before controlled data corruption.
-The same evaluation set should be reused for corrupted and repaired runs.
+Use the same evaluation contract and test set for corruption and repair.
+Mock answers and heuristic judges are not evidence of LLM-agent execution.

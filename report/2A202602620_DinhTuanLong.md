@@ -80,7 +80,7 @@ python -c "from datetime import datetime, timezone; from core.config import load
 - Kết quả mong đợi: dữ liệu sạch đạt quality và freshness.
 - Kết quả thực tế đã cung cấp từ terminal: Quality=True, Freshness=True, Overall=True.
 - Artifact: `data/quality/baseline_quality_report.json`, `baseline_freshness_report.json`.
-- Giới hạn: lần review này chưa chạy lại hai pipeline end-to-end; runtime mà công cụ review truy cập vẫn lỗi đường dẫn Python. Các chỉ số tích hợp dưới đây được đọc và đối chiếu từ artifact của nhóm, không nhận là kết quả tự chạy lại.
+- Giới hạn: lệnh trên chỉ kiểm tra phạm vi ingestion/cleaning/quality của tôi. Hai pipeline end-to-end đã được chạy lại ngày 2026-09-26 trên venv Python 3.12.10 (exit code 0); các chỉ số tích hợp dưới đây là số verify bản cuối, đối chiếu từ artifact của nhóm.
 
 ## 5. Một quyết định kỹ thuật quan trọng
 
@@ -99,7 +99,7 @@ python -c "from datetime import datetime, timezone; from core.config import load
 - Xác minh: terminal của tôi hiển thị Python 3.12.10; dòng đầu `where python` là `.venv\Scripts\python.exe`; lệnh quality chạy thành công.
 - Điều học được: kiểm tra phiên bản và đường dẫn thực thi trước khi quy lỗi cho code/thư viện.
 
-Môi trường công cụ review vẫn không thấy interpreter đó. Vì vậy không sử dụng kiểm tra cú pháp thay cho bằng chứng end-to-end.
+Sau khi thiết lập lại venv, hai pipeline end-to-end đã chạy thành công ngày 2026-09-26 (exit code 0), nên báo cáo này dùng bằng chứng end-to-end thật, không dùng kiểm tra cú pháp thay thế.
 
 ## 7. Hiểu biết về luồng end-to-end
 
@@ -111,7 +111,7 @@ Môi trường công cụ review vẫn không thấy interpreter đó. Vì vậy
 
 ## 8. Phân tích kết quả
 
-Các số liệu dưới đây thuộc phiên bản trước đợt sửa tích hợp. Chưa có kết quả end-to-end mới; phải chạy lại hai pipeline trước khi kết luận cho phiên bản nộp cuối.
+Các số liệu dưới đây là kết quả verify bản cuối sau đợt sửa tích hợp (chạy lại hai pipeline ngày 2026-09-26 trên venv Python 3.12.10, exit code 0).
 
 ### Metrics chính
 
@@ -119,10 +119,10 @@ Các số dưới đây lấy từ `data/results/*_metrics.json`, đối chiếu
 
 | Metric/signal | Baseline | Corrupted | Repaired | Nhận xét |
 | --- | ---: | ---: | ---: | --- |
-| retrieval_hit_rate | 1.0 | 0.8 | 1.0 | Mất 2/10 retrieval hits rồi phục hồi |
-| mean_token_f1 | 1.0 | 0.9 | 1.0 | Giảm 0.1 rồi phục hồi |
-| judge_accuracy | 1.0 | 0.9 | 1.0 | Chưa so sánh công bằng vì baseline dùng heuristic fallback |
-| mean_judge_score | 5.0 | 4.7 | 5.0 | Cần thống nhất judge trước khi kết luận |
+| retrieval_hit_rate | 1.0 | 0.8 | 1.0 | Mất 2/10 retrieval hits rồi phục hồi hoàn toàn |
+| mean_token_f1 | 0.8728 | 0.6792 | 0.8572 | Giảm 0.1936 rồi phục hồi gần baseline (lệch nhỏ do LLM sinh khác nhau giữa các lần chạy) |
+| judge_accuracy | 1.0 | 0.7 | 0.9 | Judge heuristic thống nhất cả ba pha nên so sánh được trực tiếp |
+| mean_judge_score | 4.4 | 3.6 | 4.2 | Suy giảm và phục hồi đo được rõ ràng |
 | Quality checks | True | False | True | GX phát hiện dữ liệu bị lỗi |
 | Freshness status | True | False | True | Tỷ lệ stale vượt ngưỡng ở trạng thái lỗi |
 | Số dòng | 24 | 21 | 24 | Drop 5, duplicate 2, repair về 24 |
@@ -130,12 +130,12 @@ Các số dưới đây lấy từ `data/results/*_metrics.json`, đối chiếu
 
 ### Kết luận từ số liệu
 
-1. Sáu thao tác corruption làm giảm số dòng, tạo duplicate/title ngắn/summary rỗng và tăng tỷ lệ stale → quality/freshness chuyển False → hit rate giảm từ 1.0 xuống 0.8, Token F1 từ 1.0 xuống 0.9.
-2. Tái tạo dữ liệu từ raw → clean/repaired trùng nhau và quality/freshness trở lại True → hai metrics trên trở lại 1.0.
+1. Sáu thao tác corruption làm giảm số dòng, tạo duplicate/title ngắn/summary rỗng và tăng tỷ lệ stale → quality/freshness chuyển False → hit rate giảm từ 1.0 xuống 0.8, Token F1 từ 0.8728 xuống 0.6792.
+2. Tái tạo dữ liệu từ raw → clean/repaired trùng nhau (hash giống hệt) và quality/freshness trở lại True → hit rate về lại 1.0, Token F1 phục hồi 0.8572 gần baseline.
 
 Việc mất tài liệu benchmark có bằng chứng rõ đối với retrieval: hai câu không tìm thấy ground-truth document trong kết quả. Tuy nhiên cả sáu lỗi được áp dụng chung nên chưa có thí nghiệm riêng để xếp hạng tác động từng lỗi. Cần chạy từng lỗi độc lập để kết luận lỗi nào ảnh hưởng mạnh nhất.
 
-Kết quả cần thận trọng: baseline đạt tuyệt đối nhưng `qa.py` bổ sung tài liệu exact-title lookup trước khi trích đáp án từ metadata; đây chưa phải phép đo riêng chất lượng semantic retrieval hay LLM Agent. Cả 10 baseline answers dùng heuristic judge fallback, trong khi corrupted/repaired không có nhãn fallback này. Do đó các judge metrics chưa đủ để khẳng định chất lượng chấm LLM nhất quán.
+Kết quả cần thận trọng: ở bản trước review, `qa.py` từng bổ sung tài liệu exact-title lookup trước khi trích đáp án từ metadata và baseline dùng heuristic judge fallback khác hai pha sau, nên baseline tuyệt đối 1.0 khi đó chưa phải phép đo riêng chất lượng semantic retrieval hay LLM Agent. Bản sửa đã bỏ exact-title injection, dùng LLM trả lời có context (grounded_llm) và thống nhất judge heuristic tường minh cả ba pha có evaluation_contract; số liệu verify mới (F1 0.8728 → 0.6792 → 0.8572) vì vậy phản ánh đúng năng lực retrieval + LLM hơn.
 
 ## 9. Điều học được và hướng cải thiện
 
@@ -147,11 +147,11 @@ Kết quả cần thận trọng: baseline đạt tuyệt đối nhưng `qa.py` 
 
 ### Nếu có thêm thời gian
 
-Thêm kiểm thử tự động cho tuổi 180/181 ngày và tỷ lệ stale đúng 25%/vượt 25%, dữ liệu rỗng, null và duplicate. Chạy lại ba trạng thái với cùng judge, ghi rõ provider/model hoặc fallback. Tách semantic retrieval khỏi exact lookup để đo được đóng góp của embedding. Kiểm tra lại loading index trên máy khác vì manifest hiện chứa đường dẫn tuyệt đối của máy thành viên.
+Thêm kiểm thử tự động cho tuổi 180/181 ngày và tỷ lệ stale đúng 25%/vượt 25%, dữ liệu rỗng, null và duplicate. Lần verify 2026-09-26 đã chạy ba trạng thái với cùng judge heuristic thống nhất, ghi rõ provider/model (Gemini `gemini-3.5-flash-lite`), và benchmark đã chuyển sang semantic retrieval, tách khỏi exact lookup. Kiểm tra lại loading index trên máy khác vì manifest cũ từng chứa đường dẫn tuyệt đối của máy thành viên (bản sửa đã lưu đường dẫn tương đối).
 
 ### Cập nhật sau review tích hợp
 
-Đã bổ sung QA dùng LLM khi provider không phải mock, bỏ exact-title injection khỏi benchmark, quy định judge tường minh và kiểm tra cùng cấu hình/test set giữa các pha. Loader dùng đường dẫn Chroma của workspace hiện tại; báo cáo pha 1 được đưa về module reporting. Đây là phần hỗ trợ tích hợp với AI sau phân công ban đầu. Chưa có kết quả end-to-end mới nên giữ nguyên số liệu lịch sử và nêu rõ giới hạn.
+Đã bổ sung QA dùng LLM khi provider không phải mock, bỏ exact-title injection khỏi benchmark, quy định judge tường minh và kiểm tra cùng cấu hình/test set giữa các pha. Loader dùng đường dẫn Chroma của workspace hiện tại; báo cáo pha 1 được đưa về module reporting. Đây là phần hỗ trợ tích hợp với AI sau phân công ban đầu. Lần verify 2026-09-26 đã có kết quả end-to-end mới nên số liệu trong mục 8 là số verify bản cuối, không còn là số liệu lịch sử.
 
 ## 10. Cam kết của thành viên
 

@@ -19,7 +19,7 @@ Phân công đối chiếu báo cáo cá nhân và lịch sử Git. Không gán 
 
 - Commit `b6f083d`: ingestion, cleaning, quality/freshness, raw records và quality artifacts.
 - Terminal cá nhân xác nhận Python 3.12.10, Quality=True, Freshness=True, Overall=True.
-- Hỗ trợ review tích hợp và hoàn thiện tài liệu/code với AI; đợt thay đổi mới chưa có kết quả end-to-end mới.
+- Hỗ trợ review tích hợp và hoàn thiện tài liệu/code với AI; verify end-to-end bản cuối đã chạy thành công ngày 2026-09-26 (baseline → corruption → repair, exit code 0) cùng demo agent Gemini thật.
 
 ### Lê Duy Bảo — 2A202602749
 
@@ -39,6 +39,8 @@ Phân công đối chiếu báo cáo cá nhân và lịch sử Git. Không gán 
 
 ## Nghiệm thu
 
+- Verify kỹ thuật hoàn tất 2026-09-26: 7/7 regression tests PASS; `script/verify_submission.cmd` exit code 0; metrics ba trạng thái có evaluation_contract thống nhất; demo agent Gemini (`gemini-3.5-flash-lite`) gọi tool `lookup_paper` thành công, evidence tại `data/results/agent_demo_answers.json`.
+- CP0–CP5 hoàn thành kỹ thuật; CP6 còn phần thủ công: commit/push cuối, kiểm tra Contributors, mỗi người nộp link LMS.
 - CP6: cả nhóm chuẩn bị demo; mỗi người tự nộp link LMS và giải thích phần phụ trách.
 - Email trên lấy từ lịch sử commit; liên kết email với GitHub và Contributors cần từng người kiểm tra.
 - Báo cáo của các thành viên khác giữ nguyên tên hiện có để bảo toàn liên kết. Chủ báo cáo nên thống nhất quy ước `<MSSV>_HoTen.md` trước khi nộp.

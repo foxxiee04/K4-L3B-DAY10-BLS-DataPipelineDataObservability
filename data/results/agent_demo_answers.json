@@ -1,0 +1,20 @@
+{
+  "provider": "gemini",
+  "model": "gemini-3.5-flash-lite",
+  "question": "What is the summary of the paper 'Continuous Benchmark Evaluation for Enterprise Retrieval Pipelines'?",
+  "answer": [
+    {
+      "type": "text",
+      "text": "The paper **\"Continuous Benchmark Evaluation for Enterprise Retrieval Pipelines\"** (published in July 2026 by Quang Le and Yen Vu) addresses the limitations of traditional, static benchmarks when evaluating enterprise knowledge management systems. \n\nHere is a summary of the paper:\n\n* **The Problem:** Static benchmarks fail to capture domain drift and changes within enterprise knowledge bases over time as new documents and data are ingested.\n* **The Solution:** The authors establish a synthetic test generator designed to automatically create paired evaluation sets whenever new corpora are ingested into enterprise retrieval pipelines. \n* **Core Contribution:** This continuous, automated approach ensures that retrieval pipeline performance is rigorously and dynamically evaluated against evolving enterprise data without relying on manual, outdated benchmark datasets.",
+      "extras": {
+        "signature": "EmAKXgFpFH0TKWSf0dBrlHHmGoJqydHfbAg7KcCz2BDHDJblFEvyJoH+vwIvRB68WHTJyhAhQRsS12SN+oX4+H4N/szdobNgY41AG7SJsaMebcHfMLSBp8c+t/gACNXpY+c="
+      }
+    }
+  ],
+  "tool_calls": [
+    {
+      "name": "lookup_paper",
+      "content": "paper_id: 10.1145/3637528.3671812\ntitle: Continuous Benchmark Evaluation for Enterprise Retrieval Pipelines\nTitle: Continuous Benchmark Evaluation for Enterprise Retrieval Pipelines\nAuthors: Quang Le, Yen Vu\nPublished: 2026-07-22\nCategories: Evaluation Methodology, Enterprise Systems\nSummary: Static benchmarks fail to capture domain drift in enterprise knowledge bases. We establish a synthetic test generator that auto-creates paired evaluation sets whenever new corpora are ingested."
+    }
+  ]
+}
