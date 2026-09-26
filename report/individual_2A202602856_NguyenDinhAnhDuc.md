@@ -4,15 +4,6 @@
 
 | Thông tin         | Nội dung                  |
 | ------------------ | -------------------------- |
-<<<<<<< HEAD
-| Họ và tên       | Lê Duy Bảo             |
-| MSSV               | 2A202602749                     |
-| Khóa/Lớp         | K4              |
-| Tên nhóm         | BLS     |
-| Vai trò chính    | BA                 |
-| Repository         | https://github.com/foxxiee04/K4-L3B-DAY10-BLS-DataPipelineDataObservability.git |
-| Ngày hoàn thành | 2026-09-26               |
-=======
 | Họ và tên       | Nguyễn Đình Anh Đức |
 | MSSV               | 2A202602856 |
 | Khóa/Lớp         | K4 - L3B |
@@ -20,7 +11,6 @@
 | Vai trò chính    | Corruption, Repair & Pipeline Integration |
 | Repository         | https://github.com/foxxiee04/K4-L3B-DAY10-BLS-DataPipelineDataObservability |
 | Ngày hoàn thành | 2026-09-26 |
->>>>>>> d8b9d25368f62bb3cb43a4fdb7bb9a451a5fb403
 
 ## 2. Vai trò và phạm vi công việc
 
