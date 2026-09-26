@@ -6,13 +6,13 @@
 
 | Thông tin         | Nội dung                  |
 | ------------------ | -------------------------- |
-| Họ và tên       | [Họ và tên]             |
-| MSSV               | [MSSV]                     |
-| Khóa/Lớp         | [K3 hoặc K4]              |
-| Tên nhóm         | [Tên hoặc mã nhóm]     |
-| Vai trò chính    | [Vai trò]                 |
-| Repository         | [Đường dẫn repository] |
-| Ngày hoàn thành | [YYYY-MM-DD]               |
+| Họ và tên       | Lê Duy Bảo             |
+| MSSV               | 2A202602749                     |
+| Khóa/Lớp         | K4              |
+| Tên nhóm         | BLS     |
+| Vai trò chính    | BA                 |
+| Repository         | https://github.com/foxxiee04/K4-L3B-DAY10-BLS-DataPipelineDataObservability.git |
+| Ngày hoàn thành | 2026-09-26               |
 
 ## 2. Vai trò và phạm vi công việc
 
