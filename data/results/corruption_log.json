@@ -1,0 +1,82 @@
+{
+  "input_rows": 24,
+  "output_rows": 21,
+  "deterministic": true,
+  "corruption_count": 6,
+  "corruptions": [
+    {
+      "type": "drop_latest_records",
+      "affected_count": 5,
+      "paper_ids": [
+        "10.1145/3637528.3671812",
+        "10.1145/3637528.3671808",
+        "10.1145/3637528.3671804",
+        "10.1145/3637528.3671807",
+        "10.1145/3637528.3671802"
+      ],
+      "parameters": {
+        "ratio": 0.2,
+        "selection": "latest published records"
+      }
+    },
+    {
+      "type": "blank_summary",
+      "affected_count": 2,
+      "paper_ids": [
+        "10.1145/3637528.3671824",
+        "10.1145/3637528.3671823"
+      ],
+      "parameters": {
+        "replacement": ""
+      }
+    },
+    {
+      "type": "inject_noise",
+      "affected_count": 2,
+      "paper_ids": [
+        "10.1145/3637528.3671822",
+        "10.1145/3637528.3671821"
+      ],
+      "parameters": {
+        "noise": " @@NOISE@@ xqzv_9381 !!! CORRUPTED_TEXT !!!"
+      }
+    },
+    {
+      "type": "truncate_title",
+      "affected_count": 2,
+      "paper_ids": [
+        "10.1145/3637528.3671810",
+        "10.1145/3637528.3671820"
+      ],
+      "parameters": {
+        "maximum_length": 7
+      }
+    },
+    {
+      "type": "stale_date",
+      "affected_count": 6,
+      "paper_ids": [
+        "10.1145/3637528.3671801",
+        "10.1145/3637528.3671811",
+        "10.1145/3637528.3671806",
+        "10.1145/3637528.3671809",
+        "10.1145/3637528.3671803",
+        "10.1145/3637528.3671805"
+      ],
+      "parameters": {
+        "days_shifted": 365
+      }
+    },
+    {
+      "type": "duplicate_rows",
+      "affected_count": 2,
+      "paper_ids": [
+        "10.1145/3637528.3671819",
+        "10.1145/3637528.3671818"
+      ],
+      "parameters": {
+        "copies_per_selected_row": 1
+      }
+    }
+  ]
+}
